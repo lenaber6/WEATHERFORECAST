@@ -1,5 +1,4 @@
-import { ChangeEvent, useState } from "react";
-import { changePassword } from "../../api/api";
+import { ChangeEvent, SetStateAction, useState } from "react";
 import Button from "../button/Button";
 import { useNavigate } from "react-router-dom";
 import { appRoutes } from "../../route/appRoutes";
@@ -32,12 +31,6 @@ const UpdatePasswordModal = () => {
       return;
     }
     changePassword(formData.password)
-      .then(() => {
-        navigate(appRoutes.USER_PAGE);
-      })
-      .catch((error) => {
-        setError(error.message);
-      });
   }
 
   return (
@@ -73,3 +66,7 @@ const UpdatePasswordModal = () => {
 };
 
 export default UpdatePasswordModal;
+function changePassword(password: string) {
+  throw new Error("Function not implemented.");
+}
+

@@ -1,139 +1,86 @@
-import Course from "../../components/course/Course";
-import {
-  fetchAddFavoriteCourseToUser,
-  getCourses,
-  getFavoriteCourseOfUser,
-} from "../../api/api";
-
-import { CourseIDType } from "../../types";
-
-import { SetStateAction, useContext, useEffect, useState } from "react";
-
-import { LoginModalContext } from "../../contexts";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
+import { ChangeEvent, useState } from "react";
+import Header from "../../components/header/Header";
+import { useNavigate } from "react-router-dom";
+import { useOutsideClick } from "../../hooks/use-outside-click";
+import { appRoutes } from "../../route/appRoutes";
 import Button from "../../components/button/Button";
-import { Bounce, ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { setCourses } from "../../store/slices/courseSlice";
 
 export default function MainPage() {
-  const [addedCourses, setAddedCourses] = useState<CourseIDType[]>([]);
-  const dispatch = useAppDispatch();
-  const { setIsLoginModalOpened } = useContext(LoginModalContext);
-  const user = useAppSelector((state) => state.user);
+  const [formData, setFormData] = useState({
+    password: "",
+    repeatPassword: "",
+  });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { ref } = useOutsideClick(() => navigate(appRoutes.USER_PAGE));
 
-  const courses = useAppSelector((state) => state.course.courses);
-  console.log(courses);
-  useEffect(() => {
-    getCourses().then((data) => {
-      dispatch(
-        setCourses({
-          courses: data,
-        })
-      );
+  function onChange(event: ChangeEvent<HTMLInputElement>) {
+    const { value, name } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
     });
-  }, []);
+  }
 
-  useEffect(() => {
-    getFavoriteCourseOfUser(user.id).then(
-      (data: SetStateAction<CourseIDType[]>) => {
-        setAddedCourses(data);
-      }
-    );
-  }, [user.id]);
-
-  const addCourse = (courseId: string) => {
-    if (user.id) {
-      console.log("сейчас кликаем на этот курс", courseId);
-
-      getFavoriteCourseOfUser(user.id).then((data: any[]) => {
-        const element = data?.some(function (el) {
-          return el.courseId == courseId;
-        });
-        console.log(element);
-
-        if (!element) {
-          console.log("элемента нет");
-          // // делаем запрос на добавление курса юзеру
-          fetchAddFavoriteCourseToUser(user.id, courseId).then(() => {
-            toast("Курс добавлен!");
-            getFavoriteCourseOfUser(user.id).then(
-              (data: SetStateAction<CourseIDType[]>) => {
-                console.log(data);
-                setAddedCourses(data);
-              }
-            );
-          });
-        } else {
-          console.log("вот он уже добавлен был и нашелся в массиве", element);
-        }
-      });
-    } else {
-      setIsLoginModalOpened(true);
+  function onClick() {
+    if (!formData.password.trim() || !formData.repeatPassword.trim()) {
+      setError("Заполните все поля!");
+      return;
     }
-  };
+    if (formData.password !== formData.repeatPassword) {
+      setError("Пароли не совпадают");
+      return;
+    }
+    // changePassword(formData.password)
+  }
 
   return (
     <>
+      <Header />
       <div className="font-roboto bg-slate-50 grid place-content-center">
         <div className="ml-2 md:mx-[140px] max-w-[1440px]">
           <div className="flex justify-between my-[50px] relative">
-            <div className="font-semibold text-[30px] lg:text-[60px] h-[120px] text-pretty inline-block align-middle text-left min-w-[280px]">
-              Начните заниматься спортом и улучшите качество жизни
+            <div className="font-semibold text-fuchsia-500 text-[30px] lg:text-[60px] h-[120px] text-pretty inline-block align-middle text-left min-w-[280px]">
+              Welcome to our weatherforecast!
             </div>
-            <div className="mt-6  p-4 text-[28px] 2xl:text-[32px] bg-custom-green max-h-[125px] rounded-md hidden lg:flex">
-              Измени своё тело за полгода!
+            <div className="mt-6 ml-12 p-4 text-[28px] 2xl:text-[32px] bg-custom-green text-purple-800 max-h-[125px] rounded-md hidden lg:flex">
+              ` What`s the weather like today?`
             </div>
             <div className="absolute top-[124px] 2xl:top-[134px] right-[150px] hidden lg:flex">
               <img src="images/polygon.png" alt="polygon" />
             </div>
+            <div className="absolute top-[124px] 2xl:top-[104px] right-[140px] hidden lg:flex">
+              <img src="images/girl_with_umbrella.png" alt="девушка с зонтом" />
+            </div>
+         
           </div>
-          <div className="grid place-content-center md:grid-cols-2 md:gap-6 lg:grid-cols-3  sm:grid-cols-1 -mr-10">
-            {courses?.map((course) => (
-              <Course
-                setAddedCourses={setAddedCourses}
-                courses={courses}
-                course={course}
-                addedCourses={addedCourses}
-                key={course._id}
-                onAddCourse={addCourse}
-                isChosenCourse={false}
-              />
-            ))}
-            <ToastContainer
-              style={{ width: "300px" }}
-              bodyClassName={() => "text-[26px]"}
-              position="bottom-center"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={true}
-              closeOnClick
-              rtl={false}
-              transition={Bounce}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
-          </div>
-          <div
-            className="flex justify-center mt-6 mb-20"
-            x-data="{ isVisible: false }"
-            x-init="window.addEventListener('scroll', () => { isVisible = window.scrollY > 100; })"
-            x-show="isVisible"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform translate-y-2 "
-          >
-            <Button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              type="primary"
-            >
-              Наверх ↑
-            </Button>
-          </div>
+          <div className="absolute bottom-50 left-30 z-10 w-[1440px] h-[950px] p-10 bg-black bg-opacity-10 rounded-3xl flex flex-raw items-center justify-start ml-50">
+              <div
+                ref={ref}
+                className="bg-white p-10 ml-64 mt-72 rounded-3xl flex flex-col gap-5 items-center"
+              >
+                <input
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  placeholder="Новый пароль"
+                  onChange={onChange}
+                  className="py-4 px-5 outline-none border-solid border-[rgba(208,206,206,1)] border-2 rounded-lg text-lg w-[280px] h-[55px]"
+                />
+                <input
+                  name="repeatPassword"
+                  type="password"
+                  value={formData.repeatPassword}
+                  onChange={onChange}
+                  placeholder="Повторите пароль"
+                  className="py-4 px-5 outline-none border-[rgba(208,206,206,1)] border-2 rounded-lg text-lg w-[280px] h-[55px]"
+                />
+                <div className="text-red-500">{error}</div>
+                <Button onClick={onClick} classNames="w-[280px]" type="primary">
+                  Подтвердить
+                </Button>
+              </div>
+            </div>
         </div>
       </div>
     </>
