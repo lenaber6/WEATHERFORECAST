@@ -25,7 +25,7 @@ export default function Header() {
             <img src="/images/logo.svg" alt="Logo" />
           </Link>
           <p className="sm:hidden lg:flex font-roboto pt-2">
-            Онлайн-тренировки для занятий дома
+            Прогноз погоды
           </p>
         </div>
         {user.email ? (
