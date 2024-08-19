@@ -1,35 +1,30 @@
 import Button from "../button/Button";
 import { Link } from "react-router-dom";
 import { useContext } from "react";
-import { LoginModalContext, UserModalContext } from "../../contexts";
+import { LoginModalContext } from "../../contexts";
 import { useAppSelector } from "../../hooks/redux-hooks";
-import UserModal from "../userModal/UserModal";
 
 export default function Header() {
   const { isLoginModalOpened, setIsLoginModalOpened } =
     useContext(LoginModalContext);
 
-  const { isUserModalOpen, setIsUserModalOpen } = useContext(UserModalContext);
 
-  function handleUserModal() {
-    console.log("click");
-    setIsUserModalOpen((prev) => !prev);
-  }
+ 
   const user = useAppSelector((state) => state.user);
 
   return (
     <div className="flex justify-center bg-slate-50">
       <div className="flex justify-between center items-center sm:h-[140px]  w-full max-w-[1440px] mx-4 pr-5">
-        <div className="flex flex-col ">
+        <div className="flex flex-raw items-center gap-10 pt-20">
           <Link to="/">
-            <img src="/images/logo.svg" alt="Logo" />
+            <img className="w-32 h-32" src="/images/logo.jpg" alt="Logo" />
           </Link>
-          <p className="sm:hidden lg:flex font-roboto pt-2">
+          <p className="sm:hidden lg:flex font-roboto font-semibold pt-2 text-purple-600 text-6xl">
             Прогноз погоды
           </p>
         </div>
         {user.email ? (
-          <div className="flex items-center lg:gap-5" onClick={handleUserModal}>
+          <div className="flex items-center lg:gap-5">
             <div className="overflow-hidden">
               <img
                 width={40}
@@ -55,9 +50,6 @@ export default function Header() {
                   />
                 </svg>
               </Button>
-              {isUserModalOpen && (
-                <UserModal handleUserModal={handleUserModal} />
-              )}
             </div>
           </div>
         ) : (
